@@ -4,7 +4,7 @@ local GITHUB_USER = "Severo34"
 local REPO_NAME = "HACK"
 local BRANCH = "main"
 
-local baseUrl = "https://raw.githubusercontent.com/"..GITHUB_USER.."/"..REPO_NAME.."/"..BRANCH.."/src/"
+local baseUrl = "https://raw.githubusercontent.com/Severo34/Hack/main/src/"
 
 local function fastLoad(path)
     local success, content = pcall(function()
