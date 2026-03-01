@@ -1,21 +1,15 @@
 local baseUrl = "https://raw.githubusercontent.com/Severo34/Hack/main/src/"
 
--- Load Utils dulu
-local Config = loadstring(game:HttpGet(baseUrl .. "utils/config_system.lua"))()
+-- Ambil fungsinya
+local success, Config = pcall(function()
+    return loadstring(game:HttpGet(baseUrl .. "utils/config_system.lua"))()
+end)
 
--- Load GUI
+-- Jalankan sisanya
 loadstring(game:HttpGet(baseUrl .. "ui_library.lua"))()
+if success then Config.LoadSettings() end
 
--- Coba load settingan lama kalau ada
-Config.LoadSettings()
-
--- Load Modul Tempur
 loadstring(game:HttpGet(baseUrl .. "modules/aimbot.lua"))()
 loadstring(game:HttpGet(baseUrl .. "modules/visuals.lua"))()
 
--- (Opsional) Bikin auto-save tiap 30 detik
-task.spawn(function()
-    while task.wait(30) do
-        Config.SaveSettings()
-    end
-end)
+print("C.R V2 Ready!")

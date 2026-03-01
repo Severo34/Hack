@@ -3,20 +3,18 @@ local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local Mouse = LocalPlayer:GetMouse()
 
-local function getClosestPlayer()
+-- Fungsi cari musuh terdekat (Tanpa cek tembok)
+local function getClosest()
     local target = nil
-    local dist = math.huge
-    
+    local mag = math.huge
     for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            -- Cek Tim (kalau bukan teman atau jika setting show team aktif)
-            if v.Team ~= LocalPlayer.Team then
-                local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
-                local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
-                
-                if magnitude < dist then
+        if v ~= LocalPlayer and v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild("Head") then
+            local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
+            if onScreen then
+                local diff = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if diff < mag then
+                    mag = diff
                     target = v
-                    dist = magnitude
                 end
             end
         end
@@ -24,21 +22,23 @@ local function getClosestPlayer()
     return target
 end
 
+-- Bypass Namecall (Teknik paling stabil buat Arsenal)
 local mt = getrawmetatable(game)
-setreadonly(mt, false)
 local old = mt.__namecall
+setreadonly(mt, false)
 
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
-    
-    -- Cek apakah Aimbot ON dan Tombol Keybind lagi ditekan
-    if _G.AimbotEnabled and UserInputService:IsKeyDown(_G.AimbotKey) then
+
+    -- Cek: Tombol GUI ON dan Keybind (Shift) ditekan
+    if _G.AimbotEnabled and UserInputService:IsKeyDown(_G.AimbotKey or Enum.KeyCode.LeftShift) then
         if method == "FindPartOnRayWithIgnoreList" or method == "Raycast" then
-            local target = getClosestPlayer()
-            if target then
-                -- Arahkan peluru langsung ke kepala (Silent Aim)
-                return old(self, Ray.new(args[1].Origin, (target.Character.Head.Position - args[1].Origin).Unit * 1000), args[2])
+            local t = getClosest()
+            if t then
+                -- Belokkan peluru langsung ke kepala musuh
+                args[1] = Ray.new(args[1].Origin, (t.Character.Head.Position - args[1].Origin).Unit * 1000)
+                return old(self, unpack(args))
             end
         end
     end
