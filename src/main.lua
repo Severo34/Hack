@@ -1,15 +1,15 @@
 local baseUrl = "https://raw.githubusercontent.com/Severo34/Hack/main/src/"
 
--- Ambil fungsinya
-local success, Config = pcall(function()
-    return loadstring(game:HttpGet(baseUrl .. "utils/config_system.lua"))()
-end)
+-- 1. Inisialisasi Variabel Global
+_G.ESPEnabled = false
+_G.AimbotEnabled = false
+_G.AimbotKey = Enum.KeyCode.LeftShift
 
--- Jalankan sisanya
+-- 2. Load UI dulu
 loadstring(game:HttpGet(baseUrl .. "ui_library.lua"))()
-if success then Config.LoadSettings() end
 
-loadstring(game:HttpGet(baseUrl .. "modules/aimbot.lua"))()
+-- 3. Load Modul Fitur
 loadstring(game:HttpGet(baseUrl .. "modules/visuals.lua"))()
+loadstring(game:HttpGet(baseUrl .. "modules/aimbot.lua"))()
 
-print("C.R V2 Ready!")
+print("C.R System V2: Struktur Folder Berhasil Dimuat!") --
