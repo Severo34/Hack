@@ -1,34 +1,19 @@
--- C.R V1.0 | SILENT AIM (SHIFT TO AIM)
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
-local Camera = workspace.CurrentCamera
 local UserInputService = game:GetService("UserInputService")
-
-local FOV_RADIUS = 150 
-local isShifting = false
-
--- Cek apakah Shift ditekan
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftShift then
-        isShifting = true
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftShift then
-        isShifting = false
-    end
-end)
+local Mouse = LocalPlayer:GetMouse()
 
 local function getClosestPlayer()
     local target = nil
-    local dist = FOV_RADIUS
+    local dist = math.huge
+    
     for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild("Head") then
-            local pos, onScreen = Camera:WorldToViewportPoint(v.Character.Head.Position)
-            if onScreen then
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+            -- Cek Tim (kalau bukan teman atau jika setting show team aktif)
+            if v.Team ~= LocalPlayer.Team then
+                local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
                 local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                
                 if magnitude < dist then
                     target = v
                     dist = magnitude
@@ -40,20 +25,23 @@ local function getClosestPlayer()
 end
 
 local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
 setreadonly(mt, false)
+local old = mt.__namecall
 
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
-
-    -- SYARAT: Tombol di GUI ON DAN lagi pencet SHIFT
-    if _G.AimbotEnabled and isShifting and (method == "FindPartOnRayWithIgnoreList" or method == "Raycast") then
-        local target = getClosestPlayer()
-        if target and target.Character and target.Character:FindFirstChild("Head") then
-            return oldNamecall(self, Ray.new(args[1].Origin, (target.Character.Head.Position - args[1].Origin).Unit * 1000), args[2])
+    
+    -- Cek apakah Aimbot ON dan Tombol Keybind lagi ditekan
+    if _G.AimbotEnabled and UserInputService:IsKeyDown(_G.AimbotKey) then
+        if method == "FindPartOnRayWithIgnoreList" or method == "Raycast" then
+            local target = getClosestPlayer()
+            if target then
+                -- Arahkan peluru langsung ke kepala (Silent Aim)
+                return old(self, Ray.new(args[1].Origin, (target.Character.Head.Position - args[1].Origin).Unit * 1000), args[2])
+            end
         end
     end
-    return oldNamecall(self, ...)
+    return old(self, ...)
 end)
 setreadonly(mt, true)

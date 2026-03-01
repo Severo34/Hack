@@ -1,31 +1,30 @@
--- C.R V1.0 | UI CONTROL CENTER
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("C.R V1.0 - Arsenal Control", "BloodTheme")
+local Window = Library.CreateLib("C.R System V2", "BloodTheme")
 
--- Variabel Status (Default Mati)
+-- Global Settings
 _G.AimbotEnabled = false
+_G.AimbotKey = Enum.KeyCode.LeftShift -- Default Shift
 _G.ESPEnabled = false
-_G.NoRecoilEnabled = false
+_G.ESPShowTeam = false
 
--- TAB COMBAT
-local Combat = Window:NewTab("Combat")
-local CombatSection = Combat:NewSection("Weapon Hacks")
+local Main = Window:NewTab("Main")
+local Combat = Main:NewSection("Combat")
 
-CombatSection:NewToggle("Silent Aim", "Peluru ngejar kepala musuh", function(state)
+Combat:NewToggle("Silent Aim", "Aktifkan Aimbot", function(state)
     _G.AimbotEnabled = state
-    print("Aimbot:", state and "ON" or "OFF")
 end)
 
-CombatSection:NewToggle("No Recoil & Inf Ammo", "Senjata lurus & peluru tak terbatas", function(state)
-    _G.NoRecoilEnabled = state
+Combat:NewKeybind("Aimbot Key", "Pilih tombol buat Aim", Enum.KeyCode.LeftShift, function(key)
+    _G.AimbotKey = key
 end)
 
--- TAB VISUALS
-local Visuals = Window:NewTab("Visuals")
-local VisualSection = Visuals:NewSection("ESP Settings")
+local Visual = Main:NewTab("Visuals")
+local ESPSection = Visual:NewSection("ESP Settings")
 
-VisualSection:NewToggle("Player ESP", "Liat musuh nembus tembok", function(state)
+ESPSection:NewToggle("Master ESP", "Lihat nembus tembok", function(state)
     _G.ESPEnabled = state
 end)
 
-print("C.R On - GUI Loaded, User.")
+ESPSection:NewToggle("Show Team", "Lihat teman juga", function(state)
+    _G.ESPShowTeam = state
+end)
