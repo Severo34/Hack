@@ -1,28 +1,35 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
 local function applyESP(player)
-    local function update()
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "CR_Highlight"
+    highlight.Parent = nil -- Mulai dari mati
+
+    RunService.RenderStepped:Connect(function()
         local char = player.Character
-        if not char then return end
-        
-        local highlight = char:FindFirstChild("CR_ESP") or Instance.new("Highlight")
-        highlight.Name = "CR_ESP"
-        highlight.Parent = char
-        
-        -- Logika Nyala/Mati
-        if _G.ESPEnabled then
-            if player.Team == LocalPlayer.Team then
-                highlight.Enabled = _G.ESPShowTeam
-                highlight.FillColor = Color3.fromRGB(0, 255, 0) -- Hijau buat teman
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            highlight.Parent = char
+            
+            -- Logika ON/OFF dari Tombol GUI
+            if _G.ESPEnabled then
+                if player.Team == LocalPlayer.Team then
+                    highlight.Enabled = _G.ESPShowTeam or false
+                    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                else
+                    highlight.Enabled = true
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                end
             else
-                highlight.Enabled = true
-                highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Merah buat musuh
+                highlight.Enabled = false
             end
-        else
-            highlight.Enabled = false
+            
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- Tembus Tembok
+            highlight.FillTransparency = 0.5
         end
-    end
-    
-    game:GetService("RunService").RenderStepped:Connect(update)
+    end)
 end
 
-game.Players.PlayerAdded:Connect(applyESP)
-for _, p in pairs(game.Players:GetPlayers()) do applyESP(p) end
+for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer then applyESP(p) end end
+Players.PlayerAdded:Connect(applyESP)
